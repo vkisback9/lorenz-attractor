@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Lorenz Attractor</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        svg {
+            width: 800px;
+            max-width: 95vw;
+            height: auto;
+            background: #000;
+            border: 1px solid white;
+        }
+
+        .lorenz {
+            fill: none;
+            stroke: #d8f0d8;
+            stroke-width: 0.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+
+            stroke-dasharray: 25 395;
+            stroke-dashoffset: 25;
+
+            opacity: 0.9;
+
+            animation:
+                draw 8s linear infinite;
+        }
+
+        @keyframes draw {
+            from {
+                stroke-dashoffset: 420;
+            }
+
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        text {
+            font-family: monospace;
+            font-size: 9px;
+            fill: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<svg id="lorenzSvg"
+     viewBox="0 0 500 280"
+     width="500"
+     height="280">
+
+    <rect
+        width="500"
+        height="280"
+        fill="#000"
+        rx="4"
+    />
+
+    <path
+        id="lorenzPath"
+        class="lorenz"
+    />
+
+    <text x="10" y="270">
+        Lorenz Attractor  σ=10  ρ=35  β=8/3
+    </text>
+
+</svg>
+
+<script>
+
+    // =========================
+    // LORENZ PARAMETERS
+    // =========================
+
+    const sigma = 10;
+    const rho = 35;
+    const beta = 8 / 3;
+
+    // Simulation settings
+    const dt = 0.005;
+    const steps = 15000;
+
+    // Starting position
+    let x = 0.1;
+    let y = 0;
+    let z = 0;
+
+    let points = [];
+
+    // =========================
+    // CALCULATE LORENZ SYSTEM
+    // =========================
+
+    for (let i = 0; i < steps; i++) {
+
+        const dx = sigma * (y - x);
+        const dy = x * (rho - z) - y;
+        const dz = x * y - beta * z;
+
+        x += dx * dt;
+        y += dy * dt;
+        z += dz * dt;
+
+        // Ignore the first few points
+        // so the attractor settles
+        if (i > 500) {
+            points.push({
+                x: x,
+                z: z
+            });
+        }
+    }
+
+    // =========================
+    // FIND BOUNDS
+    // =========================
+
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minZ = Infinity;
+    let maxZ = -Infinity;
+
+    points.forEach(p => {
+
+        minX = Math.min(minX, p.x);
+        maxX = Math.max(maxX, p.x);
+
+        minZ = Math.min(minZ, p.z);
+        maxZ = Math.max(maxZ, p.z);
+
+    });
+
+    // =========================
+    // SCALE INTO SVG
+    // =========================
+
+    const padding = 20;
+
+    const svgWidth = 500;
+    const svgHeight = 250;
+
+    const scaleX =
+        (svgWidth - padding * 2) /
+        (maxX - minX);
+
+    const scaleZ =
+        (svgHeight - padding * 2) /
+        (maxZ - minZ);
+
+    const scale = Math.min(scaleX, scaleZ);
+
+    // =========================
+    // CREATE SVG PATH
+    // =========================
+
+    let pathData = "";
+
+    points.forEach((p, index) => {
+
+        const screenX =
+            (p.x - minX) * scale + padding;
+
+        const screenY =
+            svgHeight -
+            ((p.z - minZ) * scale + padding);
+
+        if (index === 0) {
+            pathData += `M ${screenX} ${screenY}`;
+        } else {
+            pathData += ` L ${screenX} ${screenY}`;
+        }
+
+    });
+
+    // Put path into SVG
+    document
+        .getElementById("lorenzPath")
+        .setAttribute("d", pathData);
+
+</script>
+
+</body>
+</html>
