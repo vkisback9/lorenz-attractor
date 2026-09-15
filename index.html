@@ -10,29 +10,35 @@
         body {
             margin: 0;
             background: #111;
+            min-height: 100vh;
+
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
         }
 
         svg {
             width: 800px;
-            max-width: 95vw;
+            max-width: 90vw;
             height: auto;
+
             background: #000;
             border: 1px solid white;
         }
 
         .lorenz {
             fill: none;
-            stroke: #d8f0d8;
+            stroke: white;
             stroke-width: 0.7;
             stroke-linecap: round;
             stroke-linejoin: round;
 
-            stroke-dasharray: 25 395;
-            stroke-dashoffset: 25;
+            /*
+             * Makes the animation work
+             * regardless of the path length.
+             */
+            stroke-dasharray: 0.06 0.94;
+            stroke-dashoffset: 0;
 
             opacity: 0.9;
 
@@ -42,7 +48,7 @@
 
         @keyframes draw {
             from {
-                stroke-dashoffset: 420;
+                stroke-dashoffset: 1;
             }
 
             to {
@@ -60,21 +66,21 @@
 
 <body>
 
-<svg id="lorenzSvg"
-     viewBox="0 0 500 280"
-     width="500"
-     height="280">
+<svg
+    viewBox="0 0 500 280"
+    width="500"
+    height="280">
 
     <rect
         width="500"
         height="280"
         fill="#000"
-        rx="4"
     />
 
     <path
         id="lorenzPath"
         class="lorenz"
+        pathLength="1"
     />
 
     <text x="10" y="270">
@@ -93,16 +99,14 @@
     const rho = 35;
     const beta = 8 / 3;
 
-    // Simulation settings
     const dt = 0.005;
-    const steps = 15000;
+    const steps = 20000;
 
-    // Starting position
     let x = 0.1;
     let y = 0;
     let z = 0;
 
-    let points = [];
+    const points = [];
 
     // =========================
     // CALCULATE LORENZ SYSTEM
@@ -118,8 +122,6 @@
         y += dy * dt;
         z += dz * dt;
 
-        // Ignore the first few points
-        // so the attractor settles
         if (i > 500) {
             points.push({
                 x: x,
@@ -134,37 +136,50 @@
 
     let minX = Infinity;
     let maxX = -Infinity;
+
     let minZ = Infinity;
     let maxZ = -Infinity;
 
-    points.forEach(p => {
+    points.forEach(point => {
 
-        minX = Math.min(minX, p.x);
-        maxX = Math.max(maxX, p.x);
+        minX = Math.min(minX, point.x);
+        maxX = Math.max(maxX, point.x);
 
-        minZ = Math.min(minZ, p.z);
-        maxZ = Math.max(maxZ, p.z);
+        minZ = Math.min(minZ, point.z);
+        maxZ = Math.max(maxZ, point.z);
 
     });
 
     // =========================
-    // SCALE INTO SVG
+    // SVG SIZE
     // =========================
 
-    const padding = 20;
+    const width = 500;
+    const height = 250;
 
-    const svgWidth = 500;
-    const svgHeight = 250;
+    const padding = 25;
 
-    const scaleX =
-        (svgWidth - padding * 2) /
-        (maxX - minX);
+    const availableWidth = width - padding * 2;
+    const availableHeight = height - padding * 2;
 
-    const scaleZ =
-        (svgHeight - padding * 2) /
-        (maxZ - minZ);
+    const dataWidth = maxX - minX;
+    const dataHeight = maxZ - minZ;
 
-    const scale = Math.min(scaleX, scaleZ);
+    // Keep the original aspect ratio
+    const scale = Math.min(
+        availableWidth / dataWidth,
+        availableHeight / dataHeight
+    );
+
+    // Center the attractor
+    const renderedWidth = dataWidth * scale;
+    const renderedHeight = dataHeight * scale;
+
+    const offsetX =
+        (width - renderedWidth) / 2;
+
+    const offsetY =
+        (height - renderedHeight) / 2;
 
     // =========================
     // CREATE SVG PATH
@@ -172,24 +187,33 @@
 
     let pathData = "";
 
-    points.forEach((p, index) => {
+    points.forEach((point, index) => {
 
         const screenX =
-            (p.x - minX) * scale + padding;
+            (point.x - minX) * scale + offsetX;
 
         const screenY =
-            svgHeight -
-            ((p.z - minZ) * scale + padding);
+            height -
+            ((point.z - minZ) * scale + offsetY);
 
         if (index === 0) {
-            pathData += `M ${screenX} ${screenY}`;
+
+            pathData +=
+                `M ${screenX} ${screenY}`;
+
         } else {
-            pathData += ` L ${screenX} ${screenY}`;
+
+            pathData +=
+                ` L ${screenX} ${screenY}`;
+
         }
 
     });
 
-    // Put path into SVG
+    // =========================
+    // APPLY PATH
+    // =========================
+
     document
         .getElementById("lorenzPath")
         .setAttribute("d", pathData);
