@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 800 450"
+     width="800"
+     height="450">
+
+  <rect width="100%" height="100%" fill="#0d1117"/>
+
+  <g fill="none"
+     stroke="white"
+     stroke-width="2"
+     stroke-linecap="round">
+
+    <path d="M400 225
+             C350 180 310 120 250 100
+             C170 75 120 140 180 210
+             C230 270 330 255 400 225
+             C470 195 570 180 620 120
+             C680 50 750 120 700 200
+             C650 280 500 270 400 225"
+          opacity=".95">
+
+      <animate attributeName="stroke-dasharray"
+               from="1 900"
+               to="900 1"
+               dur="8s"
+               repeatCount="indefinite"/>
+
+    </path>
+
+    <path d="M400 225
+             C340 195 300 145 245 135
+             C200 127 180 165 215 205
+             C255 250 330 245 400 225
+             C470 205 545 210 585 170
+             C620 135 650 155 635 195
+             C615 245 510 260 400 225"
+          opacity=".8">
+
+      <animate attributeName="stroke-dasharray"
+               from="1 700"
+               to="700 1"
+               dur="6s"
+               repeatCount="indefinite"/>
+
+    </path>
+
+    <path d="M400 225
+             C370 210 350 175 320 160
+             C285 142 260 170 280 200
+             C305 235 350 235 400 225
+             C450 215 495 230 520 195
+             C540 165 515 145 480 160
+             C450 175 430 210 400 225"
+          opacity=".7">
+
+      <animate attributeName="stroke-dasharray"
+               from="1 500"
+               to="500 1"
+               dur="5s"
+               repeatCount="indefinite"/>
+
+    </path>
+
+  </g>
+
+  <text x="25" y="420"
+        fill="white"
+        font-family="monospace"
+        font-size="16">
+    Lorenz Attractor • σ=10 • ρ=35 • β=8/3
+  </text>
+
+</svg>
